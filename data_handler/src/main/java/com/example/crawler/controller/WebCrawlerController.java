@@ -12,47 +12,58 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-@RestController
-@CrossOrigin(origins = "http://localhost:3000") // Allows CORS requests only from the React app
-@RequestMapping("/api")
+@RestController  // Indicates that this class serves the role of a controller in Spring MVC
+@CrossOrigin(origins = "http://localhost:3000") // Allows CORS requests only from the React app running at http://localhost:3000
+@RequestMapping("/api")  // Defines the base URI for all endpoints in this controller
 public class WebCrawlerController {
 
-    private final RestTemplate restTemplate;
-    private final CrawlerService CrawlerService;
+    private final RestTemplate restTemplate;  // RestTemplate is used for consuming RESTful services
+    private final CrawlerService CrawlerService;  // Autowired service to handle business logic
 
+    // Constructor injection for RestTemplate and CrawlerService
     @Autowired
     public WebCrawlerController(RestTemplate restTemplate, CrawlerService CrawlerService) {
         this.restTemplate = restTemplate;
         this.CrawlerService = CrawlerService;
     }
 
+    // Handler method for the "/api/crawl" endpoint
     @GetMapping("/crawl")
     public ResponseEntity<String> crawlWebsite(@RequestParam String url) {
-        String apiUrl = "http://localhost:8000/crawl/";
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+        String apiUrl = "http://localhost:8000/crawl/";  // URL of the FastAPI service
+        HttpHeaders headers = new HttpHeaders();  // HTTP headers for the request
+        headers.setContentType(MediaType.APPLICATION_JSON);  // Setting the Content-Type to JSON
 
+        // Creating an HTTP entity with the URL as JSON data
         HttpEntity<String> entity = new HttpEntity<>("{\"url\":\"" + url + "\"}", headers);
 
         try {
-            // Assuming your FastAPI is expecting a POST request
+            // Sending a POST request to the FastAPI service
             String response = restTemplate.postForObject(apiUrl, entity, String.class);
+            // Parsing the response JSON
             JSONObject jsonResponse = new JSONObject(response);
-            String text = jsonResponse.getString("text");  // Adjust based on actual JSON structure.
-
+            // Extracting the text content from the response JSON
+            String text = jsonResponse.getString("text");
+            // Saving the crawled data to the database
             CrawledData data = CrawlerService.saveCrawledData(url, text);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);  // Returning the response from the FastAPI service
         } catch (HttpClientErrorException e) {
+            // Handling client errors (4xx)
             return ResponseEntity.status(e.getStatusCode()).body("Client error: " + e.getMessage());
         } catch (RestClientException e) {
+            // Handling other REST client errors
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Server error: " + e.getMessage());
         } catch (JSONException e) {
+            // Handling JSON parsing errors
             throw new RuntimeException(e);
         }
     }
+
+    // Handler method for the "/api/crawled-data" endpoint
     @GetMapping("/crawled-data")
     public ResponseEntity<List<CrawledData>> getAllCrawledData() {
+        // Retrieving all crawled data from the database
         List<CrawledData> data = CrawlerService.findAllCrawledData();
-        return ResponseEntity.ok(data);
+        return ResponseEntity.ok(data);  // Returning the list of crawled data
     }
 }
