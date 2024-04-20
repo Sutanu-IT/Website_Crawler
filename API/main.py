@@ -1,19 +1,10 @@
-from bs4 import BeautifulSoup
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import httpx
 import uvicorn
-import google.generativeai as genai
-from dotenv import load_dotenv
-import os
-load_dotenv()
+from utils import crawler, summarizer_genai, summarizer_openai
 
-
-genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
-model = genai.GenerativeModel('gemini-pro')
-
-
-app = FastAPI()
+app = FastAPI()  # creating FastAPI app
 
 
 class UrlItem(BaseModel):
@@ -24,13 +15,12 @@ class UrlItem(BaseModel):
 async def crawl_website(item: UrlItem):
     try:
         async with httpx.AsyncClient() as client:
-            response = await client.get(item.url)
+            response = await client.get(item.url)  # fetching the response
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, 'html.parser')
-            # Extract all text from the webpage
-            p_text = soup.get_text(separator=' ', strip=True)
-
-            text = model.generate_content("summarize this given text and make markdown text with proper heading subheading and list"+p_text).text
+            p_text = crawler(response)  # passing the response to crawl raw text
+            prompt = "summarize this given text and make markdown text with proper heading subheading and list"  # given prompt
+            text = summarizer_genai(prompt, p_text)  # summarizing the text with given prompt using gemini
+            # text= summarizer_openai(prompt, p_text) # summarizing the text with given prompt using openai
             return {"url": item.url, "text": text}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
