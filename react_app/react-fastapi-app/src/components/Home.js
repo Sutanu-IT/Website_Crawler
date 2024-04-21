@@ -9,7 +9,8 @@ function Home() {
 
   const handleSubmit = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/crawl?url=${encodeURIComponent(url)}`);
+      let api=`http://localhost:8080/api/crawl?url=${encodeURIComponent(url)}`
+      const response = await fetch(api);
       const data = await response.json();
       if (response.ok) {
         setTitle(data.text); 

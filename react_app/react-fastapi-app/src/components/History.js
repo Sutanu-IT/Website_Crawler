@@ -9,7 +9,8 @@ function History() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:8080/api/crawled-data');
+        const api = 'http://localhost:8080/api/crawled-data'
+        const response = await axios.get(api);
         setData(response.data.reverse());
       } catch (error) {
         console.error('Error fetching data: ', error);
@@ -24,19 +25,19 @@ function History() {
       <Typography variant="h4" gutterBottom component="div">
         Crawl History
       </Typography>
-      <Grid container spacing={2}>
+      <List>
         {data.map((item, index) => (
-          <Grid item xs={12} md={6} key={index}>
-            <Paper style={{ padding: "20px", margin: "10px" }}>
+          <ListItem key={index} alignItems="flex-start">
+            <Paper style={{ padding: "20px", margin: "10px", width: "100%" }}>
               <ReactMarkdown>
                 {`### Crawled At: ${new Date(item.crawledAt).toLocaleString()}  
 **URL**: ${item.url}  
 **Text**: ${item.text}`}
               </ReactMarkdown>
             </Paper>
-          </Grid>
+          </ListItem>
         ))}
-      </Grid>
+      </List>
     </div>
   );
 }
