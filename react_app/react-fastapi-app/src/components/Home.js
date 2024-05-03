@@ -9,7 +9,8 @@ function Home() {
 
   const handleSubmit = async () => {
     try {
-      let api=`http://localhost:8080/api/crawl?url=${encodeURIComponent(url)}`
+      let api=`http://localhost:30001/api/crawl?url=${encodeURIComponent(url)}` 
+      //  api is the url which call the backend api so here we have to give the suitable path for calling backend
       const response = await fetch(api);
       const data = await response.json();
       if (response.ok) {

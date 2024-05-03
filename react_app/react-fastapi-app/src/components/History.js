@@ -9,7 +9,8 @@ function History() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const api = 'http://localhost:8080/api/crawled-data'
+        const api = 'http://localhost:30001/api/crawled-data'
+        //  api is the url which call the backend api so here we have to give the suitable path for calling backend
         const response = await axios.get(api);
         setData(response.data.reverse());
       } catch (error) {
