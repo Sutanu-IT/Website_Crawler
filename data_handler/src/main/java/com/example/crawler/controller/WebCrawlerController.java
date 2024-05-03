@@ -30,7 +30,8 @@ public class WebCrawlerController {
     // Handler method for the "/api/crawl" endpoint
     @GetMapping("/crawl")
     public ResponseEntity<String> crawlWebsite(@RequestParam String url) {
-        String apiUrl = "http://localhost:8000/crawl/";  // URL of the FastAPI service
+        String apiUrl = "http://fastapi-fastapi-chart:8000/crawl/";  // URL of the FastAPI service
+        // in this case I used k8s cluter service name in case of localhosting use suitable one
         HttpHeaders headers = new HttpHeaders();  // HTTP headers for the request
         headers.setContentType(MediaType.APPLICATION_JSON);  // Setting the Content-Type to JSON
 
